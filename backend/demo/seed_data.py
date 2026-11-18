@@ -16,7 +16,8 @@ from models import Feedback, Cluster, Ticket, Resolution, PublicMetrics
 from services.priority import compute_priority
 from services.privacy import hash_citizen_id
 from services.routing import route_complaint
-from services.clustering import embedding_to_blob, get_demo_embedding
+from services.clustering import embedding_to_blob
+from services.ai_pipeline import get_demo_embedding
 
 
 # Ward coordinate ranges
@@ -173,6 +174,8 @@ def rand_coord(ward_id):
 def make_h3_cell(lat, lng):
     try:
         import h3 as h3lib
+        if hasattr(h3lib, "latlng_to_cell"):
+            return h3lib.latlng_to_cell(lat, lng, 8)
         return h3lib.geo_to_h3(lat, lng, 8)
     except Exception:
         return f"h3_{int(lat*100)}_{int(lng*100)}"

@@ -27,8 +27,12 @@ def get_ward_for_point(lat: float, lng: float) -> str:
 
 
 def latlng_to_h3(lat: float, lng: float, resolution: int = 8) -> str:
+    if hasattr(h3lib, "latlng_to_cell"):
+        return h3lib.latlng_to_cell(lat, lng, resolution)
     return h3lib.geo_to_h3(lat, lng, resolution)
 
 
 def h3_to_latlng(h3_cell: str):
+    if hasattr(h3lib, "cell_to_latlng"):
+        return h3lib.cell_to_latlng(h3_cell)
     return h3lib.h3_to_geo(h3_cell)
