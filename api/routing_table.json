@@ -1,0 +1,62 @@
+{
+  "pothole": {
+    "ward_1": {"dept": "BBMP Roads", "officer": "Roads Engineer W1"},
+    "ward_2": {"dept": "BBMP Roads", "officer": "Roads Engineer W2"},
+    "ward_3": {"dept": "BBMP Roads", "officer": "Roads Engineer W3"},
+    "ward_4": {"dept": "BBMP Roads", "officer": "Roads Engineer W4"},
+    "ward_5": {"dept": "BBMP Roads", "officer": "Roads Engineer W5"},
+    "ward_6": {"dept": "BBMP Roads", "officer": "Roads Engineer W6"},
+    "*": {"dept": "BBMP Roads", "officer": "Duty Roads Officer"}
+  },
+  "water": {
+    "ward_1": {"dept": "BWSSB", "officer": "Water Officer W1"},
+    "ward_2": {"dept": "BWSSB", "officer": "Water Officer W2"},
+    "ward_3": {"dept": "BWSSB", "officer": "Water Officer W3"},
+    "ward_4": {"dept": "BWSSB", "officer": "Water Officer W4"},
+    "ward_5": {"dept": "BWSSB", "officer": "Water Officer W5"},
+    "ward_6": {"dept": "BWSSB", "officer": "Water Officer W6"},
+    "*": {"dept": "BWSSB", "officer": "Duty Water Officer"}
+  },
+  "garbage": {
+    "ward_1": {"dept": "BBMP SWM", "officer": "Sanitation Officer W1"},
+    "ward_2": {"dept": "BBMP SWM", "officer": "Sanitation Officer W2"},
+    "ward_3": {"dept": "BBMP SWM", "officer": "Sanitation Officer W3"},
+    "ward_4": {"dept": "BBMP SWM", "officer": "Sanitation Officer W4"},
+    "ward_5": {"dept": "BBMP SWM", "officer": "Sanitation Officer W5"},
+    "ward_6": {"dept": "BBMP SWM", "officer": "Sanitation Officer W6"},
+    "*": {"dept": "BBMP SWM", "officer": "Duty Sanitation Officer"}
+  },
+  "streetlight": {
+    "ward_1": {"dept": "BESCOM", "officer": "Electrical Officer W1"},
+    "ward_2": {"dept": "BESCOM", "officer": "Electrical Officer W2"},
+    "ward_3": {"dept": "BESCOM", "officer": "Electrical Officer W3"},
+    "ward_4": {"dept": "BESCOM", "officer": "Electrical Officer W4"},
+    "ward_5": {"dept": "BESCOM", "officer": "Electrical Officer W5"},
+    "ward_6": {"dept": "BESCOM", "officer": "Electrical Officer W6"},
+    "*": {"dept": "BESCOM", "officer": "Duty Electrical Officer"}
+  },
+  "drain": {
+    "ward_1": {"dept": "BBMP Drainage", "officer": "Drainage Officer W1"},
+    "ward_2": {"dept": "BBMP Drainage", "officer": "Drainage Officer W2"},
+    "ward_3": {"dept": "BBMP Drainage", "officer": "Drainage Officer W3"},
+    "ward_4": {"dept": "BBMP Drainage", "officer": "Drainage Officer W4"},
+    "ward_5": {"dept": "BBMP Drainage", "officer": "Drainage Officer W5"},
+    "ward_6": {"dept": "BBMP Drainage", "officer": "Drainage Officer W6"},
+    "*": {"dept": "BBMP Drainage", "officer": "Duty Drainage Officer"}
+  },
+  "animal": {
+    "*": {"dept": "BBMP Veterinary", "officer": "Animal Control Officer"}
+  },
+  "noise": {
+    "*": {"dept": "BBMP Enforcement", "officer": "Enforcement Officer"}
+  },
+  "construction": {
+    "*": {"dept": "BBMP Engineering", "officer": "Chief Engineer"}
+  },
+  "other": {
+    "*": {"dept": "BBMP General", "officer": "Ward Officer"}
+  },
+  "default": {
+    "*": {"dept": "BBMP General", "officer": "Duty Officer"}
+  }
+}

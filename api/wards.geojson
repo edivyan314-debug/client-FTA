@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {"ward_id": "ward_1", "name": "Shivajinagar"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[77.58, 12.97], [77.60, 12.97], [77.60, 12.99], [77.58, 12.99], [77.58, 12.97]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"ward_id": "ward_2", "name": "Jayanagar"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[77.57, 12.92], [77.60, 12.92], [77.60, 12.95], [77.57, 12.95], [77.57, 12.92]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"ward_id": "ward_3", "name": "Whitefield"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[77.73, 12.96], [77.76, 12.96], [77.76, 12.98], [77.73, 12.98], [77.73, 12.96]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"ward_id": "ward_4", "name": "Yelahanka"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[77.54, 13.01], [77.57, 13.01], [77.57, 13.04], [77.54, 13.04], [77.54, 13.01]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"ward_id": "ward_5", "name": "Koramangala"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[77.62, 12.93], [77.65, 12.93], [77.65, 12.95], [77.62, 12.95], [77.62, 12.93]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"ward_id": "ward_6", "name": "Hebbal"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[77.58, 13.04], [77.61, 13.04], [77.61, 13.07], [77.58, 13.07], [77.58, 13.04]]]
+      }
+    }
+  ]
+}

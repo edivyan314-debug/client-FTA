@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: citizen-fta-api
+    runtime: docker
+    dockerfilePath: ./api/Dockerfile
+    dockerContext: ./api
+    healthCheckPath: /health
+    plan: free
+    envVars:
+      - key: DEMO_MODE
+        value: "true"
+      - key: DEMO_SEED_ON_BOOT
+        value: "true"
+      - key: ALLOWED_ORIGINS
+        value: "http://localhost:3000"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: CITIZEN_HASH_SALT
+        generateValue: true
