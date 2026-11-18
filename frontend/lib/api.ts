@@ -92,6 +92,7 @@ export interface DepartmentMetrics {
 export interface CategoryMetrics {
   category: string;
   volume: number;
+  count?: number;
 }
 
 export interface PublicMetricsResponse {
@@ -103,6 +104,13 @@ export interface PublicMetricsResponse {
   h3_cells: H3CellMetrics[];
   departments: DepartmentMetrics[];
   categories: CategoryMetrics[];
+  summary?: {
+    total_volume?: number;
+    resolution_pct?: number;
+    median_resolution_hours?: number;
+    top_categories?: CategoryMetrics[];
+  };
+  hexes?: H3CellMetrics[];
 }
 
 // --- Helpers ---

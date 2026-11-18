@@ -25,12 +25,61 @@ export default function ClusterMap({ clusters, selectedId, onSelect }: ClusterMa
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const map = L.map(containerRef.current).setView([12.9716, 77.5946], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
+
+    const voyager = L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20,
+      }
+    );
+
+    const positron = L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20,
+      }
+    );
+
+    const satellite = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      {
+        attribution: 'Tiles &copy; Esri',
+        maxZoom: 19,
+      }
+    );
+
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
+    });
+
+    const map = L.map(containerRef.current, {
+      center: [12.9716, 77.5946],
+      zoom: 12,
+      layers: [voyager],
+    });
+
+    L.control.layers({
+      'CARTO Voyager (Detailed)': voyager,
+      'CARTO Positron (Clean)': positron,
+      'Satellite (Esri)': satellite,
+      'OpenStreetMap': osm,
     }).addTo(map);
+
     mapRef.current = map;
-    return () => { map.remove(); mapRef.current = null; };
+
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 250);
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -40,7 +89,10 @@ export default function ClusterMap({ clusters, selectedId, onSelect }: ClusterMa
     // Remove old markers not in current clusters
     const currentIds = new Set(clusters.map((c) => c.id));
     markersRef.current.forEach((m, id) => {
-      if (!currentIds.has(id)) { m.remove(); markersRef.current.delete(id); }
+      if (!currentIds.has(id)) {
+        m.remove();
+        markersRef.current.delete(id);
+      }
     });
 
     clusters.forEach((c) => {
@@ -50,8 +102,11 @@ export default function ClusterMap({ clusters, selectedId, onSelect }: ClusterMa
       if (c.h3_cell) {
         try {
           const [h3lat, h3lng] = h3ToLatLng(c.h3_cell);
-          lat = h3lat; lng = h3lng;
-        } catch { /* use fallback */ }
+          lat = h3lat;
+          lng = h3lng;
+        } catch {
+          /* use fallback */
+        }
       }
 
       const color = priorityMarkerColor(c.priority);
@@ -59,7 +114,12 @@ export default function ClusterMap({ clusters, selectedId, onSelect }: ClusterMa
 
       if (markersRef.current.has(c.id)) {
         const m = markersRef.current.get(c.id)!;
-        m.setStyle({ color, fillColor: color, weight: isSelected ? 3 : 1.5, radius: isSelected ? 18 : 12 });
+        m.setStyle({
+          color,
+          fillColor: color,
+          weight: isSelected ? 3 : 1.5,
+          radius: isSelected ? 18 : 12,
+        });
       } else {
         const m = L.circleMarker([lat, lng], {
           radius: isSelected ? 18 : 12,
@@ -71,14 +131,16 @@ export default function ClusterMap({ clusters, selectedId, onSelect }: ClusterMa
         }).addTo(map);
 
         m.bindPopup(`
-          <div style="min-width:180px">
+          <div style="min-width:180px;font-family:sans-serif">
             <b style="font-size:13px">${c.title}</b><br/>
             <span style="color:#6b7280;font-size:11px">${c.category} · ${c.ward_id}</span><br/>
             <span style="font-size:11px">Priority: <b style="color:${color}">${c.priority.toFixed(1)}</b> · ${c.size} complaints</span><br/>
-            <a href="/officer/${c.id}" style="font-size:11px;color:#4f46e5">View details →</a>
+            <a href="/officer/${c.id}" style="font-size:11px;color:#4f46e5;font-weight:600;display:inline-block;margin-top:4px">View details →</a>
           </div>
         `);
-        m.on('click', () => { onSelect(c.id); });
+        m.on('click', () => {
+          onSelect(c.id);
+        });
         markersRef.current.set(c.id, m);
       }
     });
@@ -86,4 +148,3 @@ export default function ClusterMap({ clusters, selectedId, onSelect }: ClusterMa
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 }
-

@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import Link from 'next/link';
 import DemoModeBar from '@/components/DemoModeBar';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Citizen FTA — Feedback-to-Action Loop',
@@ -18,9 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-50 min-h-screen`}>
+      <body className="font-sans antialiased bg-gray-50 min-h-screen text-gray-900">
         <DemoModeBar />
-        <nav className="bg-white border-b border-gray-200 shadow-sm">
+        <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center gap-2 text-xl font-bold text-indigo-700 hover:text-indigo-800">
@@ -51,9 +48,6 @@ export default function RootLayout({
           </div>
         </nav>
         <main>{children}</main>
-        <footer className="mt-16 border-t border-gray-200 bg-white py-6 text-center text-xs text-gray-400">
-          © 2024 Citizen FTA — AI-Powered Civic Grievance Resolution
-        </footer>
       </body>
     </html>
   );

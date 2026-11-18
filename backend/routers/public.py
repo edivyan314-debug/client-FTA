@@ -20,7 +20,8 @@ def public_metrics(db: Session = Depends(get_db)):
 
     total_volume = sum(m.volume for m in metrics)
     total_resolved = sum(m.resolved for m in metrics)
-    resolution_pct = (total_resolved / total_volume * 100) if total_volume > 0 else 0.0
+    resolution_rate = round(total_resolved / total_volume, 3) if total_volume > 0 else 0.0
+    resolution_pct = round(resolution_rate * 100, 1)
 
     # Median resolution hours
     hours_list = [m.median_resolution_hours for m in metrics if m.median_resolution_hours is not None]
@@ -38,8 +39,10 @@ def public_metrics(db: Session = Depends(get_db)):
     category_counts = {}
     for c in clusters:
         category_counts[c.category] = category_counts.get(c.category, 0) + c.size
-    top_categories = sorted(category_counts.items(), key=lambda x: x[1], reverse=True)[:5]
-    top_categories = [{"category": k, "count": v} for k, v in top_categories]
+    top_cat_list = sorted(category_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_categories = [{"category": k, "count": v, "volume": v} for k, v in top_cat_list]
+
+    active_clusters_count = len([c for c in clusters if c.status in ["open", "under_review", "action_taken"]])
 
     # Hex aggregation
     hex_data = {}
@@ -55,11 +58,12 @@ def public_metrics(db: Session = Depends(get_db)):
         vol = data["volume"]
         res = data["resolved"]
         lat_lng = h3_to_latlng(h3_cell)
+        hex_pct = round(res / vol, 3) if vol > 0 else 0.0
         hexes.append({
             "h3_cell": h3_cell,
             "volume": vol,
             "resolved": res,
-            "resolution_pct": round(res / vol * 100, 1) if vol > 0 else 0.0,
+            "resolution_pct": hex_pct,
             "lat": lat_lng[0] if lat_lng else None,
             "lng": lat_lng[1] if lat_lng else None,
         })
@@ -77,22 +81,32 @@ def public_metrics(db: Session = Depends(get_db)):
     for dept, data in dept_data.items():
         vol = data["volume"]
         res = data["resolved"]
+        dept_pct = round(res / vol, 3) if vol > 0 else 0.0
         departments.append({
             "department": dept,
             "volume": vol,
             "resolved": res,
-            "resolution_pct": round(res / vol * 100, 1) if vol > 0 else 0.0,
+            "resolution_pct": dept_pct,
         })
 
     departments.sort(key=lambda x: x["volume"], reverse=True)
 
     return {
+        # Top-level fields matching PublicMetricsResponse
+        "total_complaints": total_volume,
+        "total_resolved": total_resolved,
+        "resolution_rate": resolution_rate,
+        "median_resolution_hours": round(median_hours, 1) if median_hours else None,
+        "active_clusters": active_clusters_count,
+        "categories": top_categories,
+        "h3_cells": hexes,
+        "departments": departments,
+        # Nested summary for backwards compatibility
         "summary": {
             "total_volume": total_volume,
-            "resolution_pct": round(resolution_pct, 1),
+            "resolution_pct": resolution_pct,
             "median_resolution_hours": round(median_hours, 1) if median_hours else None,
             "top_categories": top_categories,
         },
         "hexes": hexes,
-        "departments": departments,
     }

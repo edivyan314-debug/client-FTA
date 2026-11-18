@@ -25,35 +25,91 @@ export default function H3HexMap({ cells }: H3HexMapProps) {
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const map = L.map(containerRef.current).setView([12.9716, 77.5946], 11);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
+
+    // Use CARTO Positron as high-performance modern civic basemap
+    const positron = L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20,
+      }
+    );
+
+    const voyager = L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20,
+      }
+    );
+
+    const satellite = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+        maxZoom: 19,
+      }
+    );
+
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
+    });
+
+    const map = L.map(containerRef.current, {
+      center: [12.9716, 77.5946],
+      zoom: 11,
+      layers: [positron],
+    });
+
+    L.control.layers({
+      'CARTO Positron (Clean)': positron,
+      'CARTO Voyager (Detailed)': voyager,
+      'Satellite (Esri)': satellite,
+      'OpenStreetMap': osm,
     }).addTo(map);
+
     mapRef.current = map;
-    return () => { map.remove(); mapRef.current = null; };
+
+    // Invalidate size once DOM has fully rendered
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 250);
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    if (layerRef.current) { layerRef.current.remove(); layerRef.current = null; }
-    if (!cells.length) return;
+    if (layerRef.current) {
+      layerRef.current.remove();
+      layerRef.current = null;
+    }
+    if (!cells || !cells.length) return;
 
-    const maxVol = Math.max(...cells.map((c) => c.volume), 1);
+    const maxVol = Math.max(...cells.map((c) => c.volume || 1), 1);
 
     const features = cells
       .map((cell) => {
         try {
           const boundary = getH3Boundary(cell.h3_cell);
+          if (!boundary || !boundary.length) return null;
           const coords = boundary.map(([lat, lng]) => [lng, lat]);
-          coords.push(coords[0]); // close ring
+          coords.push(coords[0]); // close polygon ring
+          const resRate = cell.resolution_pct > 1 ? cell.resolution_pct / 100 : cell.resolution_pct;
           return {
             type: 'Feature' as const,
             properties: {
               h3_cell: cell.h3_cell,
               volume: cell.volume,
               resolved: cell.resolved,
-              resolution_pct: cell.resolution_pct,
+              resolution_pct: resRate,
               pct: cell.volume / maxVol,
             },
             geometry: {
@@ -74,20 +130,20 @@ export default function H3HexMap({ cells }: H3HexMapProps) {
           const pct = feature?.properties?.pct ?? 0;
           return {
             fillColor: densityColor(pct),
-            fillOpacity: 0.6,
-            color: '#fff',
-            weight: 1,
+            fillOpacity: 0.65,
+            color: '#ffffff',
+            weight: 1.5,
           };
         },
         onEachFeature: (feature, l) => {
           const p = feature.properties;
           l.bindPopup(`
-            <div style="font-size:12px;min-width:160px">
-              <b style="font-size:13px">H3 Cell</b><br/>
-              <span style="color:#6b7280;font-size:10px">${p.h3_cell}</span><br/>
-              Volume: <b>${p.volume}</b><br/>
-              Resolved: <b>${p.resolved}</b><br/>
-              Resolution: <b>${(p.resolution_pct * 100).toFixed(0)}%</b>
+            <div style="font-size:12px;min-width:180px;font-family:sans-serif;line-height:1.4">
+              <div style="font-weight:700;font-size:13px;margin-bottom:4px">H3 Hex Cell</div>
+              <div style="color:#6b7280;font-size:11px;word-break:break-all;margin-bottom:6px"><code>${p.h3_cell}</code></div>
+              <div style="display:flex;justify-content:space-between"><span>Complaints:</span><b>${p.volume}</b></div>
+              <div style="display:flex;justify-content:space-between"><span>Resolved:</span><b>${p.resolved}</b></div>
+              <div style="display:flex;justify-content:space-between"><span>Resolution Rate:</span><b>${(p.resolution_pct * 100).toFixed(0)}%</b></div>
             </div>
           `);
         },
@@ -96,10 +152,15 @@ export default function H3HexMap({ cells }: H3HexMapProps) {
 
     layerRef.current = layer;
 
-    if (cells.length > 0) {
+    if (features.length > 0) {
       try {
-        map.fitBounds(layer.getBounds(), { padding: [20, 20] });
-      } catch { /* ok */ }
+        const bounds = layer.getBounds();
+        if (bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [30, 30] });
+        }
+      } catch {
+        /* ok */
+      }
     }
   }, [cells]);
 
