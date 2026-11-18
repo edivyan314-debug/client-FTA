@@ -21,3 +21,4 @@ services:
         sync: false
       - key: CITIZEN_HASH_SALT
         generateValue: true
+
