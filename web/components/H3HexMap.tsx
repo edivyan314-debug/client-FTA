@@ -26,54 +26,50 @@ export default function H3HexMap({ cells }: H3HexMapProps) {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    // Use CARTO Positron as high-performance modern civic basemap
+    const googleKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || '';
+
+    // Google Maps Layers
+    const googleRoadmap = L.tileLayer(
+      `https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}${googleKey ? `&key=${googleKey}` : ''}`,
+      {
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        maxZoom: 21,
+        attribution: '&copy; <a href="https://maps.google.com">Google Maps</a>',
+      }
+    );
+
+    const googleHybrid = L.tileLayer(
+      `https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}${googleKey ? `&key=${googleKey}` : ''}`,
+      {
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        maxZoom: 21,
+        attribution: '&copy; <a href="https://maps.google.com">Google Maps Satellite</a>',
+      }
+    );
+
     const positron = L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
         subdomains: 'abcd',
         maxZoom: 20,
       }
     );
-
-    const voyager = L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 20,
-      }
-    );
-
-    const satellite = L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-        maxZoom: 19,
-      }
-    );
-
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19,
-    });
 
     const map = L.map(containerRef.current, {
       center: [12.9716, 77.5946],
       zoom: 11,
-      layers: [positron],
+      layers: [googleRoadmap],
     });
 
     L.control.layers({
-      'CARTO Positron (Clean)': positron,
-      'CARTO Voyager (Detailed)': voyager,
-      'Satellite (Esri)': satellite,
-      'OpenStreetMap': osm,
+      'Google Maps (Roadmap)': googleRoadmap,
+      'Google Maps (Satellite)': googleHybrid,
+      'CARTO Positron (Minimal)': positron,
     }).addTo(map);
 
     mapRef.current = map;
 
-    // Invalidate size once DOM has fully rendered
     setTimeout(() => {
       map.invalidateSize();
     }, 250);
@@ -132,7 +128,7 @@ export default function H3HexMap({ cells }: H3HexMapProps) {
             fillColor: densityColor(pct),
             fillOpacity: 0.65,
             color: '#ffffff',
-            weight: 1.5,
+            weight: 2,
           };
         },
         onEachFeature: (feature, l) => {

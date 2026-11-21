@@ -26,7 +26,27 @@ export default function ClusterMap({ clusters, selectedId, onSelect }: ClusterMa
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const voyager = L.tileLayer(
+    const googleKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || '';
+
+    const googleRoadmap = L.tileLayer(
+      `https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}${googleKey ? `&key=${googleKey}` : ''}`,
+      {
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        maxZoom: 21,
+        attribution: '&copy; <a href="https://maps.google.com">Google Maps</a>',
+      }
+    );
+
+    const googleHybrid = L.tileLayer(
+      `https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}${googleKey ? `&key=${googleKey}` : ''}`,
+      {
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        maxZoom: 21,
+        attribution: '&copy; <a href="https://maps.google.com">Google Maps Satellite</a>',
+      }
+    );
+
+    const cartoVoyager = L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
       {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -35,39 +55,16 @@ export default function ClusterMap({ clusters, selectedId, onSelect }: ClusterMa
       }
     );
 
-    const positron = L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-      {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 20,
-      }
-    );
-
-    const satellite = L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      {
-        attribution: 'Tiles &copy; Esri',
-        maxZoom: 19,
-      }
-    );
-
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19,
-    });
-
     const map = L.map(containerRef.current, {
       center: [12.9716, 77.5946],
       zoom: 12,
-      layers: [voyager],
+      layers: [googleRoadmap],
     });
 
     L.control.layers({
-      'CARTO Voyager (Detailed)': voyager,
-      'CARTO Positron (Clean)': positron,
-      'Satellite (Esri)': satellite,
-      'OpenStreetMap': osm,
+      'Google Maps (Roadmap)': googleRoadmap,
+      'Google Maps (Satellite)': googleHybrid,
+      'CARTO Voyager': cartoVoyager,
     }).addTo(map);
 
     mapRef.current = map;
@@ -86,7 +83,6 @@ export default function ClusterMap({ clusters, selectedId, onSelect }: ClusterMa
     const map = mapRef.current;
     if (!map) return;
 
-    // Remove old markers not in current clusters
     const currentIds = new Set(clusters.map((c) => c.id));
     markersRef.current.forEach((m, id) => {
       if (!currentIds.has(id)) {

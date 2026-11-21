@@ -18,8 +18,6 @@ export default function MapPicker({ lat, lng, onSelect }: MapPickerProps) {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    // Fix Leaflet default icon path in Next.js
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -27,42 +25,55 @@ export default function MapPicker({ lat, lng, onSelect }: MapPickerProps) {
       shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
     });
 
-    const voyager = L.tileLayer(
+    const googleKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || '';
+
+    const googleRoadmap = L.tileLayer(
+      `https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}${googleKey ? `&key=${googleKey}` : ''}`,
+      {
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        maxZoom: 21,
+        attribution: '&copy; <a href="https://maps.google.com">Google Maps</a>',
+      }
+    );
+
+    const googleHybrid = L.tileLayer(
+      `https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}${googleKey ? `&key=${googleKey}` : ''}`,
+      {
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        maxZoom: 21,
+        attribution: '&copy; <a href="https://maps.google.com">Google Maps Satellite</a>',
+      }
+    );
+
+    const googleTerrain = L.tileLayer(
+      `https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}${googleKey ? `&key=${googleKey}` : ''}`,
+      {
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        maxZoom: 20,
+        attribution: '&copy; <a href="https://maps.google.com">Google Maps Terrain</a>',
+      }
+    );
+
+    const cartoVoyager = L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
       {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
         subdomains: 'abcd',
         maxZoom: 20,
-      }
-    );
-
-    const positron = L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-      {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 20,
-      }
-    );
-
-    const satellite = L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      {
-        attribution: 'Tiles &copy; Esri',
-        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
       }
     );
 
     const map = L.map(containerRef.current, {
       center: [lat, lng],
       zoom: 14,
-      layers: [voyager],
+      layers: [googleRoadmap],
     });
 
     L.control.layers({
-      'CARTO Voyager (Detailed)': voyager,
-      'CARTO Positron (Clean)': positron,
-      'Satellite (Esri)': satellite,
+      'Google Maps (Roadmap)': googleRoadmap,
+      'Google Maps (Satellite Hybrid)': googleHybrid,
+      'Google Maps (Terrain)': googleTerrain,
+      'CARTO Voyager': cartoVoyager,
     }).addTo(map);
 
     const marker = L.marker([lat, lng], { draggable: true }).addTo(map);
