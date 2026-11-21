@@ -18,6 +18,8 @@ export default function MapPicker({ lat, lng, onSelect }: MapPickerProps) {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
+    // Fix Leaflet default icon path in Next.js
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -27,6 +29,7 @@ export default function MapPicker({ lat, lng, onSelect }: MapPickerProps) {
 
     const googleKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || '';
 
+    // Google Maps Layers
     const googleRoadmap = L.tileLayer(
       `https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}${googleKey ? `&key=${googleKey}` : ''}`,
       {
@@ -54,6 +57,7 @@ export default function MapPicker({ lat, lng, onSelect }: MapPickerProps) {
       }
     );
 
+    // CARTO Fallback
     const cartoVoyager = L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
       {
