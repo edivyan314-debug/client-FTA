@@ -5,7 +5,7 @@ from pydantic import Field
 
 class Settings(BaseSettings):
     gemini_api_key: Optional[str] = None
-    gemini_model: str = "gemini-2.0-flash"
+    gemini_model: str = "gemini-2.5-flash"
     embedding_model: str = "models/text-embedding-004"
     demo_mode: bool = True
     cluster_threshold: float = 0.78
